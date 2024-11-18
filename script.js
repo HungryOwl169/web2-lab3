@@ -203,9 +203,7 @@ function ballComponent(radius, color, x, y) {
       bricks[i].update();
       if (checkCollision(this, bricks[i])) {
         bricks.splice(i, 1);
-        if (currentScore < 6) {
-          currentScore++;
-        }
+        currentScore = 6 - bricks.length;
       }
     }
   
