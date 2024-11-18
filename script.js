@@ -7,7 +7,7 @@ var maxScore = localStorage.getItem("maxScore") || 0;
 const myPaddleWidth = 230;
 const myPaddleHeight = 10;
 const paddleSpeed = 13;
-const ballSpeed = 10;
+const ballSpeed = 7;
 const brickNumber = 3;
 const myBallRadius = 15;
 const destroyedBricks = 0;
@@ -34,7 +34,7 @@ function endTheGame(msg) {
 // funckija koja crta cigle
 function spawnBricks(brickNumberPerRow, numberOfRows) {
   let brickWidth = window.innerWidth / brickNumberPerRow;
-  let brickHeight = 70;
+  let brickHeight = 110;
 
   for (let row = 0; row < numberOfRows; row++) {
     for (let col = 0; col < brickNumberPerRow; col++) {
@@ -129,7 +129,6 @@ function startGame() {
   currentScore = 0;
 }
 
-
 // objekt koji pretstavlja sam kanvas i igru
 var myGameArea = {
   canvas: document.createElement("canvas"),
@@ -158,16 +157,15 @@ function rectangleComponent(width, height, color, x, y) {
   this.x = x;
   this.y = y;
 
-// funckija koja updejta pravokutnike
+  // funckija koja updejta pravokutnike
   this.update = function () {
-
     ctx = myGameArea.context;
-    ctx.shadowColor = "rgba(0, 0, 0, 0.6)"; 
-    ctx.shadowBlur = 10; 
-    ctx.shadowOffsetX = 5; 
+    ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetX = 5;
     ctx.shadowOffsetY = 5;
 
-    ctx.fillStyle = color; 
+    ctx.fillStyle = color;
     ctx.fillRect(this.x, this.y, this.width, this.height);
 
     ctx.shadowColor = "transparent";
@@ -194,40 +192,31 @@ function ballComponent(radius, color, x, y) {
   this.speedX = ballSpeed;
   this.speedY = ballSpeed;
   this.move = function () {
-    let previousX = this.x;
-    let previousY = this.y;
     this.x += this.speedX;
     this.y += this.speedY;
-  
-    let brickHit = false;
-  
+
     for (let i = bricks.length - 1; i >= 0; i--) {
-      bricks[i].update();
-      if (!brickHit && checkCollision(this, bricks[i])) {
-        bricks.splice(i, 1);
-        currentScore++;
-        brickHit = true;
-        
-        break;
-      }
+        if (checkCollision(this, bricks[i])) {
+          bricks.splice(i, 1);
+          currentScore++;
+          break;
+        }
     }
-  
-    if (previousX !== this.x) {
-      if (this.x - this.radius <= 0 || this.x + this.radius >= myGameArea.canvas.width) {
-        this.speedX *= -1;
-      }
+
+    if (
+      this.x - this.radius <= 0 ||
+      this.x + this.radius >= myGameArea.canvas.width
+    ) {
+      this.speedX *= -1;
     }
-  
-    if (previousY !== this.y) {
-      if (this.y - this.radius <= 0) {
-        this.speedY *= -1;
-      }
+
+    if (this.y - this.radius <= 0) {
+      this.speedY *= -1;
     }
-  
     if (this.y + this.radius >= myGameArea.canvas.height) {
       endTheGame("GAME OVER!");
     }
-  
+
     if (
       this.y + this.radius >= myPaddle.y &&
       this.y - this.radius <= myPaddle.y + myPaddleHeight &&
@@ -235,18 +224,10 @@ function ballComponent(radius, color, x, y) {
       this.x - this.radius <= myPaddle.x + myPaddleWidth
     ) {
       this.speedY *= -1;
-      this.speedX *= 0.9 + Math.random() * 0.4;
-      let maxSpeed = ballSpeed;
-      let speedMagnitude = Math.sqrt(
-        this.speedX * this.speedX + this.speedY * this.speedY
-      );
-      if (speedMagnitude > maxSpeed) {
-        this.speedX = (this.speedX / speedMagnitude) * maxSpeed;
-        this.speedY = (this.speedY / speedMagnitude) * maxSpeed;
-      }
+      this.speedX *= 0.9 + Math.random() * 0.5;
     }
   };
-  
+
   // funckija za postavljanje pocetnog kuta
   this.initialAngle = function () {
     let angle = Math.floor(Math.random() * 121) + 30;
@@ -270,6 +251,8 @@ function updateGameArea() {
   myPaddle.update();
   myBall.update();
   myBall.move();
+
+  bricks.forEach(brick => brick.update());
 
   let ctx = myGameArea.context;
   ctx.fillStyle = "black";
