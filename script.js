@@ -194,29 +194,37 @@ function ballComponent(radius, color, x, y) {
   this.speedX = ballSpeed;
   this.speedY = ballSpeed;
   this.move = function () {
+    let previousX = this.x;
+    let previousY = this.y;
     this.x += this.speedX;
     this.y += this.speedY;
+  
     for (let i = bricks.length - 1; i >= 0; i--) {
       bricks[i].update();
-      if (checkCollision(myBall, bricks[i])) {
+      if (checkCollision(this, bricks[i])) {
         bricks.splice(i, 1);
         if (currentScore < 6) {
-            currentScore++;
+          currentScore++;
         }
       }
     }
-    if (
-      this.x - this.radius <= 0 ||
-      this.x + this.radius >= myGameArea.canvas.width
-    ) {
-      this.speedX *= -1;
+  
+    if (previousX !== this.x) {
+      if (this.x - this.radius <= 0 || this.x + this.radius >= myGameArea.canvas.width) {
+        this.speedX *= -1;
+      }
     }
-    if (this.y - this.radius <= 0) {
-      this.speedY *= -1;
+  
+    if (previousY !== this.y) {
+      if (this.y - this.radius <= 0) {
+        this.speedY *= -1;
+      }
     }
+  
     if (this.y + this.radius >= myGameArea.canvas.height) {
       endTheGame("GAME OVER!");
     }
+  
     if (
       this.y + this.radius >= myPaddle.y &&
       this.y - this.radius <= myPaddle.y + myPaddleHeight &&
@@ -224,8 +232,10 @@ function ballComponent(radius, color, x, y) {
       this.x - this.radius <= myPaddle.x + myPaddleWidth
     ) {
       this.speedY *= -1;
+      this.speedX *= (0.7 + Math.random() * 0.4);
     }
   };
+  
   // funckija za postavljanje pocetnog kuta
   this.initialAngle = function () {
     let angle = Math.floor(Math.random() * 121) + 30;
