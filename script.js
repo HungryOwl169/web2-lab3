@@ -7,14 +7,15 @@ var maxScore = localStorage.getItem("maxScore") || 0;
 const myPaddleWidth = 230;
 const myPaddleHeight = 10;
 const paddleSpeed = 13;
-const ballSpeed = 7;
+const ballSpeed = 9;
 const brickNumber = 3;
 const myBallRadius = 15;
-const destroyedBricks = 0;
+var destroyedBricks = 0;
 
-// funckija koja kad igra zavrsi cisti ekran i ispisuje odgovarajucu poruku, pa resetira igru
+// funkcija zavrsava igru i cisti kanvas, ispisuje potrebnu poruku i resetira igru
 function endTheGame(msg) {
   clearInterval(myGameArea.interval);
+  bricks.forEach(brick => brick.hidden = true);
   myGameArea.clear();
   let ctx = myGameArea.context;
   ctx.fillStyle = "black";
@@ -31,7 +32,7 @@ function endTheGame(msg) {
   }, 2000);
 }
 
-// funckija koja crta cigle
+// funckija crta cigle
 function spawnBricks(brickNumberPerRow, numberOfRows) {
   let brickWidth = window.innerWidth / brickNumberPerRow;
   let brickHeight = 110;
@@ -46,8 +47,9 @@ function spawnBricks(brickNumberPerRow, numberOfRows) {
   }
 }
 
-// funckija koja kontrolira sudare
+// funkcija gleda kolizije
 function checkCollision(ball, rectangle) {
+    if (rectangle.hidden == true) {return;}
   let ballLeft = ball.x - ball.radius;
   let ballRight = ball.x + ball.radius;
   let ballTop = ball.y - ball.radius;
@@ -98,7 +100,6 @@ function checkCollision(ball, rectangle) {
   return false;
 }
 
-// fukcija koja starta igru i postavlja odgovarajuce elemente i varijable u pocetno stanje
 function startGame() {
   myGameArea.start();
   myPaddle = new rectangleComponent(
@@ -127,9 +128,9 @@ function startGame() {
   myBall.initialAngle();
   spawnBricks(brickNumber, 2);
   currentScore = 0;
+  destroyedBricks = 0;
 }
 
-// objekt koji pretstavlja sam kanvas i igru
 var myGameArea = {
   canvas: document.createElement("canvas"),
   start: function () {
@@ -150,15 +151,15 @@ var myGameArea = {
   },
 };
 
-// construktor funkcija za pravokutaste elemente
 function rectangleComponent(width, height, color, x, y) {
   this.width = width;
   this.height = height;
   this.x = x;
   this.y = y;
+  this.hidden = false;
 
-  // funckija koja updejta pravokutnike
   this.update = function () {
+    if (this.hidden == true) {return;}
     ctx = myGameArea.context;
     ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
     ctx.shadowBlur = 10;
@@ -175,8 +176,6 @@ function rectangleComponent(width, height, color, x, y) {
   };
 }
 
-// konstruktor funkcija za loptu, osim sto crta loptu takoder pazi na sudare sa ostalim elementima ili rubovima
-// kanvasa. Pritom zove odgovarajuce pomocne funkcije. Postavlja pocetni kut loptice i bavi se odbijanjem od palicu
 function ballComponent(radius, color, x, y) {
   this.radius = radius;
   this.x = x;
@@ -197,8 +196,10 @@ function ballComponent(radius, color, x, y) {
 
     for (let i = bricks.length - 1; i >= 0; i--) {
         if (checkCollision(this, bricks[i])) {
-          bricks.splice(i, 1);
+          bricks[i].hidden = true;
           currentScore++;
+          destroyedBricks++;
+          break;
         }
     }
 
@@ -227,7 +228,6 @@ function ballComponent(radius, color, x, y) {
     }
   };
 
-  // funckija za postavljanje pocetnog kuta
   this.initialAngle = function () {
     let angle = Math.floor(Math.random() * 121) + 30;
     let angleInRadians = (angle * Math.PI) / 180;
@@ -238,7 +238,6 @@ function ballComponent(radius, color, x, y) {
   };
 }
 
-// funckija koja updejta igru te time omogucuje kretanje elemenata
 function updateGameArea() {
   myGameArea.clear();
   if (myGameArea.key === "ArrowLeft") {
@@ -249,9 +248,10 @@ function updateGameArea() {
   }
   myPaddle.update();
   myBall.update();
-  myBall.move();
 
   bricks.forEach(brick => brick.update());
+
+  myBall.move();
 
   let ctx = myGameArea.context;
   ctx.fillStyle = "black";
@@ -261,7 +261,7 @@ function updateGameArea() {
   ctx.fillText("Score: " + currentScore, myGameArea.canvas.width - 20, 20);
   ctx.fillText("Max Score: " + maxScore, myGameArea.canvas.width - 20, 40);
 
-  if (bricks.length === 0) {
+  if (destroyedBricks >= brickNumber*2) {
     endTheGame("YOU WON !");
   }
 }
