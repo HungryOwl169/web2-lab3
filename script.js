@@ -34,7 +34,7 @@ function endTheGame(msg) {
 // funckija koja crta cigle
 function spawnBricks(brickNumberPerRow, numberOfRows) {
   let brickWidth = window.innerWidth / brickNumberPerRow;
-  let brickHeight = 50;
+  let brickHeight = 70;
 
   for (let row = 0; row < numberOfRows; row++) {
     for (let col = 0; col < brickNumberPerRow; col++) {
@@ -232,7 +232,15 @@ function ballComponent(radius, color, x, y) {
       this.x - this.radius <= myPaddle.x + myPaddleWidth
     ) {
       this.speedY *= -1;
-      this.speedX *= (0.7 + Math.random() * 0.4);
+      this.speedX *= 0.9 + Math.random() * 0.4;
+      let maxSpeed = ballSpeed;
+      let speedMagnitude = Math.sqrt(
+        this.speedX * this.speedX + this.speedY * this.speedY
+      );
+      if (speedMagnitude > maxSpeed) {
+        this.speedX = (this.speedX / speedMagnitude) * maxSpeed;
+        this.speedY = (this.speedY / speedMagnitude) * maxSpeed;
+      }
     }
   };
   
