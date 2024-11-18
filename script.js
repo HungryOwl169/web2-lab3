@@ -199,7 +199,6 @@ function ballComponent(radius, color, x, y) {
         if (checkCollision(this, bricks[i])) {
           bricks.splice(i, 1);
           currentScore++;
-          break;
         }
     }
 
