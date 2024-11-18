@@ -199,11 +199,16 @@ function ballComponent(radius, color, x, y) {
     this.x += this.speedX;
     this.y += this.speedY;
   
+    let brickHit = false;
+  
     for (let i = bricks.length - 1; i >= 0; i--) {
       bricks[i].update();
-      if (checkCollision(this, bricks[i])) {
+      if (!brickHit && checkCollision(this, bricks[i])) {
         bricks.splice(i, 1);
-        currentScore = 6 - bricks.length;
+        currentScore++;
+        brickHit = true;
+        
+        break;
       }
     }
   
